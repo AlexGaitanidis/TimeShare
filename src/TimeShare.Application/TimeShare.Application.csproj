@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Authentication\Queries\Login\" />
+    <Folder Include="Authentication\Common\" />
+    <Folder Include="Behaviors\" />
+    <Folder Include="Invitations\Commands\AcceptInvitation\" />
+    <Folder Include="Invitations\Commands\SendInvitation\" />
+    <Folder Include="Meetings\Commands\CreateMeeting\" />
+    <Folder Include="Meetings\Queries\GetMeetingById\" />
+    <Folder Include="Users\Commands\UpdateUserName\" />
+    <Folder Include="Users\Events\OnUserNameChanged\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.5.2" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="MediatR" Version="12.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TimeShare.Domain\TimeShare.Domain.csproj" />
+    <InternalsVisibleTo Include="TimeShare.Application.UnitTests" />
+  </ItemGroup>
+
+</Project>
