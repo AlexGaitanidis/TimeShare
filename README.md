@@ -5,7 +5,7 @@ TimeShare is an application that helps you create meetings and invite people to 
 > 
 > This is not a real world application. It has been created mostly to showcase and practice different architecture styles, patterns and practices I find interesting.
 
-It is a WebAPI written in C# (.NET 7) following **Clean Architecture** and **Domain-Driven Design** principles.
+It is a WebAPI written in C# (.NET 7) following **Domain-Driven Design** and **Clean Architecture** principles.
 
 ## Features
 
