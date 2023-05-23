@@ -14,67 +14,56 @@ public class CreateMeetingCommandHandlerTests
     private readonly Mock<IHostRepository> _hostRepositoryMock;
     private readonly Mock<IMeetingRepository> _meetingRepositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly CreateMeetingCommand _command;
+    private readonly CreateMeetingCommandHandler _handler;
 
     public CreateMeetingCommandHandlerTests()
-    {
+    {        
         _hostRepositoryMock = new();
         _meetingRepositoryMock = new();
         _unitOfWorkMock = new();
+
+        _command = new CreateMeetingCommand(
+            "name",
+            "description",
+            DateTime.UtcNow + TimeSpan.FromHours(1),
+            DateTime.UtcNow + TimeSpan.FromHours(5),
+            null,
+            HostId.CreateUnique(),
+            null);
+
+        _handler = new CreateMeetingCommandHandler(
+            _hostRepositoryMock.Object,
+            _meetingRepositoryMock.Object,
+            _unitOfWorkMock.Object);
     }
 
     [Fact]
     public async Task Handle_ShouldReturnError_WhenHostDoesNotExist()
     {
         // Arrange
-        var command = new CreateMeetingCommand(
-            "name",
-            "description",
-            DateTime.UtcNow + TimeSpan.FromHours(1),
-            DateTime.UtcNow + TimeSpan.FromHours(5),
-            null,
-            HostId.CreateUnique(),
-            null);
-
-        _hostRepositoryMock.Setup(x => x.HostExists(command.HostId, default))
+        _hostRepositoryMock.Setup(
+            x => x.HostExists(_command.HostId, default))
             .ReturnsAsync(false);
 
-        var handler = new CreateMeetingCommandHandler(
-            _hostRepositoryMock.Object,
-            _meetingRepositoryMock.Object,
-            _unitOfWorkMock.Object);
-
         // Act
-        ErrorOr<Meeting> result = await handler.Handle(command, default);
+        ErrorOr<Meeting> result = await _handler.Handle(_command, default);
 
         // Assert
         result.IsError.Should().BeTrue();
-        result.FirstError.Should().Be(DomainErrors.Host.NotFound(command.HostId));
+        result.FirstError.Should().Be(DomainErrors.Host.NotFound(_command.HostId));
     }
 
     [Fact]
     public async Task Handle_ShouldReturnMeeting_WhenHostExists()
     {
         // Arrange
-        var command = new CreateMeetingCommand(
-            "name",
-            "description",
-            DateTime.UtcNow + TimeSpan.FromHours(1),
-            DateTime.UtcNow + TimeSpan.FromHours(5),
-            null,
-            HostId.CreateUnique(),
-            null);
-
         _hostRepositoryMock.Setup(
-                x => x.HostExists(command.HostId, default))
+            x => x.HostExists(_command.HostId, default))
             .ReturnsAsync(true);
 
-        var handler = new CreateMeetingCommandHandler(
-            _hostRepositoryMock.Object,
-            _meetingRepositoryMock.Object,
-            _unitOfWorkMock.Object);
-
         // Act
-        ErrorOr<Meeting> result = await handler.Handle(command, default);
+        ErrorOr<Meeting> result = await _handler.Handle(_command, default);
 
         // Assert
         result.IsError.Should().BeFalse();
@@ -85,26 +74,12 @@ public class CreateMeetingCommandHandlerTests
     public async Task Handle_ShouldCallAddOnRepository_WhenHostExists()
     {
         // Arrange
-        var command = new CreateMeetingCommand(
-            "name",
-            "description",
-            DateTime.UtcNow + TimeSpan.FromHours(1),
-            DateTime.UtcNow + TimeSpan.FromHours(5),
-            null,
-            HostId.CreateUnique(),
-            null);
-
         _hostRepositoryMock.Setup(
-                x => x.HostExists(command.HostId, default))
+            x => x.HostExists(_command.HostId, default))
             .ReturnsAsync(true);
 
-        var handler = new CreateMeetingCommandHandler(
-            _hostRepositoryMock.Object,
-            _meetingRepositoryMock.Object,
-            _unitOfWorkMock.Object);
-
         // Act
-        ErrorOr<Meeting> result = await handler.Handle(command, default);
+        ErrorOr<Meeting> result = await _handler.Handle(_command, default);
 
         // Assert
         _meetingRepositoryMock.Verify(
@@ -116,26 +91,12 @@ public class CreateMeetingCommandHandlerTests
     public async Task Handle_ShouldNotCallUnitOfWork_WhenHostDoesNotExist()
     {
         // Arrange
-        var command = new CreateMeetingCommand(
-            "name",
-            "description",
-            DateTime.UtcNow + TimeSpan.FromHours(1),
-            DateTime.UtcNow + TimeSpan.FromHours(5),
-            null,
-            HostId.CreateUnique(),
-            null);
-
         _hostRepositoryMock.Setup(
-                x => x.HostExists(command.HostId, default))
+            x => x.HostExists(_command.HostId, default))
             .ReturnsAsync(false);
 
-        var handler = new CreateMeetingCommandHandler(
-            _hostRepositoryMock.Object,
-            _meetingRepositoryMock.Object,
-            _unitOfWorkMock.Object);
-
         // Act
-        await handler.Handle(command, default);
+        await _handler.Handle(_command, default);
 
         // Assert
         _unitOfWorkMock.Verify(
